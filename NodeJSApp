@@ -1,0 +1,74 @@
+Async.series([
+        function (callback)
+        {
+            console.log("Starting IR temperatures sensor for %s...", sensorTag.id);
+            sensorTag.enableIrTemperature(callback);
+        },
+        function (callback)
+        {
+            console.log("Starting humidity sensor for %s...", sensorTag.id);
+            sensorTag.enableHumidity(callback);
+        },
+        function (callback)
+        {
+            console.log("Starting pressure sensor for %s...", sensorTag.id);
+            sensorTag.enableBarometricPressure(callback);
+         },
+         function (callback)
+         {
+             console.log("Starting light intensity sensor for %s...", sensorTag.id);
+             sensorTag.enableLuxometer(callback);
+         }
+         ], function () {
+            setInterval(function () {
+                var readings = { sensorId: sensorTag.id };
+                Async.series([
+                      function (callback)
+                      {
+                          sensorTag.readHumidity(function (error, temperature, humidity)
+                          {
+                              readings.humidity = humidity;
+                              readings.temperatureFromHumidity = temperature;
+                              callback();
+                           });
+                        },
+                      function (callback)
+                      {
+                          sensorTag.readIrTemperature(function (error, objectTemperature, ambientTemperature) {
+                          readings.objectTemperature = objectTemperature;
+                          readings.temperatureFromIr = ambientTemperature;
+                          callback();
+                        });
+                        },
+                        function (callback)
+                        {
+                            sensorTag.readBarometricPressure(function (error, pressure)
+                            {
+                                readings.pressure = pressure;
+                                callback();
+                            });
+                        },
+                        function (callback)
+                        {
+                            sensorTag.readLuxometer(function (error, lux){
+                                readings.lux = lux;
+                                callback();
+                            });
+                        }
+                    ], function()
+                    {
+                        readings.currentTime = new Date();
+                        var message = new Message(JSON.stringify(readings));
+                        client.sendEvent(message, function (error) {
+                            if (error)
+                            {
+                                console.log(error.toString());
+                            } 
+                            else
+                            {
+                                console.log("Data sent on %s...", readings.currentTime);
+                            }
+                        });
+                    });
+                }, 1000);
+            });
