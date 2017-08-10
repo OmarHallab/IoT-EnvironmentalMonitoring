@@ -11,4 +11,4 @@ Sensor Data is displayed in real time and can be viewed both on Browser and Mobi
 
 
 
-![alt text](http://url/to/img.png)
+![Screenshot of real time streaming Data](https://github.com/OmarHallab/IoT-EnvironmentalMonitoring/blob/master/BI1.PNG)
